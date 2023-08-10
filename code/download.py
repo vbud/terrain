@@ -51,8 +51,8 @@ def download_dem(bbox, directory, overwrite, high_res):
     urls = get_urls(bbox, high_res)
 
     local_paths = []
-    for url in urls:
-        print(f'Downloading url: {url}')
+    for index, url in enumerate(urls):
+        print(f'Downloading url {index+1} of {len(urls)}: {url}')
         local_path = download_url(url, directory, overwrite=overwrite)
         if local_path is not None:
             local_paths.append(local_path)
@@ -60,31 +60,32 @@ def download_dem(bbox, directory, overwrite, high_res):
     return local_paths
 
 
-def get_urls(bbox, high_res, use_best_fit=True):
+def get_urls(bbox, high_res, use_best_fit=False):
     """
     Args:
         - bbox (tuple): bounding box (west, south, east, north)
         - high_res (bool): If True, downloads high-res 1/3 arc-second DEM
         - use_best_fit: Filter by bestFitIndex > 0
     """
-    url = 'https://viewer.nationalmap.gov/tnmaccess/api/products'
+    url = 'https://tnmaccess.nationalmap.gov/api/v1/products'
     if high_res:
         product = 'National Elevation Dataset (NED) 1/3 arc-second'
     else:
         product = 'National Elevation Dataset (NED) 1 arc-second'
 
     extent = '1 x 1 degree'
-    fmt = 'IMG'
+    fmt = 'GeoTIFF'
 
     params = {
         'datasets': product,
         'bbox': ','.join(map(str, bbox)),
         'outputFormat': 'JSON',
-        'version': 1,
         'prodExtents': extent,
-        'prodFormats': fmt}
+        'prodFormats': fmt
+    }
 
     res = requests.get(url, params=params)
+    print('Download url:', res.url)
     res = res.json()
 
     # If I don't need to page for more results, return

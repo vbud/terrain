@@ -111,3 +111,9 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# editor
+.vscode
+
+# OS
+.DS_Store
